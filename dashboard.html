@@ -1,0 +1,113 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+<title>CodeCraftHub Dashboard</title>
+<style>
+body{font-family:Arial;margin:40px;background:#f4f6f8}
+h1{color:#333}
+table{width:100%;border-collapse:collapse;margin-top:20px}
+th,td{padding:10px;border:1px solid #ddd}
+button{padding:6px 10px;margin:2px}
+input{padding:5px}
+</style>
+</head>
+
+<body>
+
+<h1>CodeCraftHub Dashboard</h1>
+
+<h3>Add Course</h3>
+
+<input id="name" placeholder="Course Name">
+<input id="description" placeholder="Description">
+<input id="date" placeholder="Target Date">
+<select id="status">
+<option>Not Started</option>
+<option>In Progress</option>
+<option>Completed</option>
+</select>
+
+<button onclick="addCourse()">Add</button>
+
+<h3>Courses</h3>
+
+<table id="coursesTable">
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Description</th>
+<th>Date</th>
+<th>Status</th>
+<th>Actions</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<script>
+
+const API="http://localhost:5000/api/courses"
+
+function loadCourses(){
+fetch(API)
+.then(res=>res.json())
+.then(data=>{
+
+const tbody=document.querySelector("#coursesTable tbody")
+tbody.innerHTML=""
+
+data.courses.forEach(c=>{
+
+const row=`
+<tr>
+<td>${c.id}</td>
+<td>${c.name}</td>
+<td>${c.description}</td>
+<td>${c.target_date}</td>
+<td>${c.status}</td>
+<td>
+<button onclick="deleteCourse(${c.id})">Delete</button>
+</td>
+</tr>
+`
+
+tbody.innerHTML+=row
+
+})
+
+})
+}
+
+function addCourse(){
+
+const course={
+name:document.getElementById("name").value,
+description:document.getElementById("description").value,
+target_date:document.getElementById("date").value,
+status:document.getElementById("status").value
+}
+
+fetch(API,{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(course)
+})
+.then(()=>loadCourses())
+
+}
+
+function deleteCourse(id){
+
+fetch(API+"/"+id,{method:"DELETE"})
+.then(()=>loadCourses())
+
+}
+
+loadCourses()
+
+</script>
+
+</body>
+</html>
