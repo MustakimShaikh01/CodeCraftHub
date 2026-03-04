@@ -1,38 +1,123 @@
-
 <!DOCTYPE html>
 <html>
 <head>
 <title>CodeCraftHub Dashboard</title>
+
 <style>
-body{font-family:Arial;margin:40px;background:#f4f6f8}
-h1{color:#333}
-table{width:100%;border-collapse:collapse;margin-top:20px}
-th,td{padding:10px;border:1px solid #ddd}
-button{padding:6px 10px;margin:2px}
-input{padding:5px}
+
+body{
+font-family: Arial, Helvetica, sans-serif;
+background:#f4f6f8;
+margin:40px;
+}
+
+.container{
+max-width:900px;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+}
+
+.form-group{
+margin-bottom:10px;
+}
+
+input,select{
+width:100%;
+padding:8px;
+margin-top:4px;
+border:1px solid #ccc;
+border-radius:4px;
+}
+
+button{
+padding:8px 14px;
+border:none;
+border-radius:4px;
+cursor:pointer;
+}
+
+.add-btn{
+background:#28a745;
+color:white;
+}
+
+.delete-btn{
+background:#dc3545;
+color:white;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+padding:10px;
+border:1px solid #ddd;
+text-align:left;
+}
+
+th{
+background:#f1f1f1;
+}
+
+.message{
+margin-top:10px;
+color:green;
+}
+
 </style>
+
 </head>
 
 <body>
 
-<h1>CodeCraftHub Dashboard</h1>
+<div class="container">
+
+<h1>CodeCraftHub</h1>
 
 <h3>Add Course</h3>
 
-<input id="name" placeholder="Course Name">
-<input id="description" placeholder="Description">
-<input id="date" placeholder="Target Date">
+<div class="form-group">
+<label>Course Name</label>
+<input id="name">
+</div>
+
+<div class="form-group">
+<label>Description</label>
+<input id="description">
+</div>
+
+<div class="form-group">
+<label>Target Date</label>
+<input id="date" type="date">
+</div>
+
+<div class="form-group">
+<label>Status</label>
 <select id="status">
 <option>Not Started</option>
 <option>In Progress</option>
 <option>Completed</option>
 </select>
+</div>
 
-<button onclick="addCourse()">Add</button>
+<button class="add-btn" onclick="addCourse()">Add Course</button>
+
+<div class="message" id="msg"></div>
 
 <h3>Courses</h3>
 
-<table id="coursesTable">
+<table>
+
 <thead>
 <tr>
 <th>ID</th>
@@ -43,41 +128,55 @@ input{padding:5px}
 <th>Actions</th>
 </tr>
 </thead>
-<tbody></tbody>
+
+<tbody id="coursesBody"></tbody>
+
 </table>
+
+</div>
 
 <script>
 
-const API="http://localhost:5000/api/courses"
+const API="http://127.0.0.1:5000/api/courses"
+
+function showMessage(text){
+document.getElementById("msg").innerText=text
+setTimeout(()=>{document.getElementById("msg").innerText=""},2000)
+}
 
 function loadCourses(){
+
 fetch(API)
 .then(res=>res.json())
 .then(data=>{
 
-const tbody=document.querySelector("#coursesTable tbody")
+const tbody=document.getElementById("coursesBody")
 tbody.innerHTML=""
 
 data.courses.forEach(c=>{
 
-const row=`
-<tr>
+const row=document.createElement("tr")
+
+row.innerHTML=`
+
 <td>${c.id}</td>
 <td>${c.name}</td>
 <td>${c.description}</td>
 <td>${c.target_date}</td>
 <td>${c.status}</td>
+
 <td>
-<button onclick="deleteCourse(${c.id})">Delete</button>
+<button class="delete-btn" onclick="deleteCourse(${c.id})">Delete</button>
 </td>
-</tr>
+
 `
 
-tbody.innerHTML+=row
+tbody.appendChild(row)
 
 })
 
 })
+
 }
 
 function addCourse(){
@@ -94,14 +193,30 @@ method:"POST",
 headers:{"Content-Type":"application/json"},
 body:JSON.stringify(course)
 })
-.then(()=>loadCourses())
+.then(()=>{
+
+showMessage("Course added successfully")
+
+document.getElementById("name").value=""
+document.getElementById("description").value=""
+document.getElementById("date").value=""
+
+loadCourses()
+
+})
 
 }
 
 function deleteCourse(id){
 
 fetch(API+"/"+id,{method:"DELETE"})
-.then(()=>loadCourses())
+.then(()=>{
+
+showMessage("Course deleted")
+
+loadCourses()
+
+})
 
 }
 

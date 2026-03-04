@@ -36,6 +36,13 @@ def get_next_id(courses):
     return max(course["id"] for course in courses) + 1
 
 
+@app.route("/")
+def home():
+    return {
+        "message":"CodeCraftHub API running",
+        "endpoint":"/api/courses"
+    }
+
 @app.route("/api/courses", methods=["GET"])
 def get_courses():
     courses = load_courses()
